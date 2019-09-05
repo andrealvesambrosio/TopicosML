@@ -2,11 +2,11 @@
 title: "Como tunar seu modelo de KNN de forma simples"
 output: html_notebook
 ---
-Este projeto tem como objetivo documentar o processo de escolha de modelo de machine learning, demonstrando que atÈ mesmo modelos simples podem performar bons resultados quando aplicados de maneira coerente.
+Este projeto tem como objetivo documentar o processo de escolha de modelo de machine learning, demonstrando que at√© mesmo modelos simples podem performar bons resultados quando aplicados de maneira coerente.
 
-Para isso, utilizaremos um banco de dados com poucas observaÁıes e utilizaremos o mÈtodo Grid Search para seleÁ„o de hiper par‚metros e o mÈtodo Leave One Out para validaÁ„o dos modelos. E a metodologia a ser abordada ser· o KNN (K Vizinhos mais prÛximos), que possui uma teoria simples por tr·s do algoritmo, e n„o h· possÌveis "empecilhos" em raz„o de pressupostos de distribuiÁ„o.
+Para isso, utilizaremos um banco de dados com poucas observa√ß√µes e utilizaremos o m√©todo Grid Search para sele√ß√£o de hiper par√¢metros e o m√©todo Leave One Out para valida√ß√£o dos modelos. E a metodologia a ser abordada ser√° o KNN (K Vizinhos mais pr√≥ximos), que possui uma teoria simples por tr√°s do algoritmo, e n√£o h√° poss√≠veis "empecilhos" em raz√£o de pressupostos de distribui√ß√£o.
 
-Com isto estabelecido, podemos iniciar nossa an·lise!
+Com isto estabelecido, podemos iniciar nossa an√°lise!
 
 
 ## Preparando o terreno
@@ -20,13 +20,13 @@ require(plotly)
 set.seed(2100)
 ```
 
-#### FunÁıes 
-Para n„o "poluir" o corpo do cÛdigo, iremos definir algumas funÁıes para utiliz·-las posteriormente, facilitando a interpretaÁ„o futura. S„o elas:
+#### Fun√ß√µes 
+Para n√£o "poluir" o corpo do c√≥digo, iremos definir algumas fun√ß√µes para utiliz√°-las posteriormente, facilitando a interpreta√ß√£o futura. S√£o elas:
 
 - Criar um data frame vazio com as colunas para identificar cada modelo criado
-- Popular um data frame j· existente, informando a posiÁ„o e valores
-- Calcular a acur·cia
-- Criar combinaÁıes agrupando vari·veis estabelecidas
+- Popular um data frame j√° existente, informando a posi√ß√£o e valores
+- Calcular a acur√°cia
+- Criar combina√ß√µes agrupando vari√°veis estabelecidas
 
 ```{r}
 
@@ -53,7 +53,7 @@ popular_df <- function(df, contador, k, dist, peso, var, score){
   return(df)
 }
 
-# Calcular a Acur·cia
+# Calcular a Acur√°cia
 calcular_acc <- function(teste, fitted, variavel){
   real <- pull(teste[,variavel])
   acc <- ((sum(real == fitted))/length(fitted))
@@ -61,7 +61,7 @@ calcular_acc <- function(teste, fitted, variavel){
   return(acc)
 }
 
-# Criar combinaÁıes
+# Criar combina√ß√µes
 calcular_combinacoes <- function(df, posicoes){
   df  <- df[,posicoes]
   col <- names(df)
@@ -89,13 +89,13 @@ calcular_combinacoes <- function(df, posicoes){
 ```
 
 #### Dados
-Os dados a serem utilizados, s„o de domÌnio p˙blico e podem ser obtidos na biblioteca carData, sob nome de "National Statistics From The United Nations, Mostly From 2009--2011".
+Os dados a serem utilizados, s√£o de dom√≠nio p√∫blico e podem ser obtidos na biblioteca carData, sob nome de "National Statistics From The United Nations, Mostly From 2009--2011".
 
-Possui informaÁıes referentes ‡ 213 lugares, como sa˙de, bem-estar e educaÁ„o.
+Possui informa√ß√µes referentes √† 213 lugares, como sa√∫de, bem-estar e educa√ß√£o.
 
-O intuito deste projeto n„o È lidar com dados n„o balanceados, portanto iremos pegar dados somente das regiıes Africa e Asia, que possuem quantidade semelhante de observaÁıes. 
+O intuito deste projeto n√£o √© lidar com dados n√£o balanceados, portanto iremos pegar dados somente das regi√µes Africa e Asia, que possuem quantidade semelhante de observa√ß√µes. 
 
-Como tambÈm n„o temos uma grande quantidade de features, n„o utilizaremos nenhum mÈtodo de seleÁ„o de features mais sofisticado, iremos olhar apenas para a performance histÛrica de cada modelo.
+Como tamb√©m n√£o temos uma grande quantidade de features, n√£o utilizaremos nenhum m√©todo de sele√ß√£o de features mais sofisticado, iremos olhar apenas para a performance hist√≥rica de cada modelo.
 ```{r}
 head(carData::UN) %>%
   print()
@@ -115,20 +115,20 @@ print(data)
 print(ggpairs(data, aes(colour = region)))
 ```
 
-Podemos verificar na diagonal principal as densidades de cada vari·vel para cada regi„o, em que ¡frica È vermelho e ¡sia È azul. Apenas no "olho" diria que lifeExpF È minha favorita para distinguir as regiıes.
+Podemos verificar na diagonal principal as densidades de cada vari√°vel para cada regi√£o, em que √Åfrica √© vermelho e √Åsia √© azul. Apenas no "olho" diria que lifeExpF √© minha favorita para distinguir as regi√µes.
 
 ## Separando os dados
 Agora iremos dividir nossos dados em duas partes:
 
-- Modelo: dados que ser„o utilizados para criaÁ„o e escolha do possÌvel melhor modelo. (Ser· dividido em treino e teste ainda)
-- Fora: dados que n„o ser„o utilizados para criaÁ„o de nenhum modelo. Ser· utilizado para verificarmos a performance do modelo escolhido em novos dados.
+- Modelo: dados que ser√£o utilizados para cria√ß√£o e escolha do poss√≠vel melhor modelo. (Ser√° dividido em treino e teste ainda)
+- Fora: dados que n√£o ser√£o utilizados para cria√ß√£o de nenhum modelo. Ser√° utilizado para verificarmos a performance do modelo escolhido em novos dados.
 
-Temos 102 observaÁıes no total, utilizaremos 82 para criar o modelo, e 20 para test·-lo.
+Temos 102 observa√ß√µes no total, utilizaremos 82 para criar o modelo, e 20 para test√°-lo.
 ```{r}
 
 data_fora <- data %>%
   group_by(region) %>%
-  sample_n(size = 10, replace = F)  # Pegando aleatoriamente 10 observaÁıes de cada regi„o
+  sample_n(size = 10, replace = F)  # Pegando aleatoriamente 10 observa√ß√µes de cada regi√£o
 
 print(data_fora)
 
@@ -151,22 +151,22 @@ print(data_model)
 
 ## Escolha do Modelo
 
-### Escolha dos hiper par‚metros: Grid Search
-Nada mais È do que uma palavra bonita para se testar todas as combinaÁıes possÌveis para os valores estabelecidos. No nosso caso, iremos variar alguns valores de K, alguns valores para a dist‚ncia de Minkowski, e as vari·veis escolhidas para se treinar o modelo.
+### Escolha dos hiper par√¢metros: Grid Search
+Nada mais √© do que uma palavra bonita para se testar todas as combina√ß√µes poss√≠veis para os valores estabelecidos. No nosso caso, iremos variar alguns valores de K, alguns valores para a dist√¢ncia de Minkowski, e as vari√°veis escolhidas para se treinar o modelo.
 
 Totalizando 620 modelos distintos.
 
-### ValidaÁ„o: Leave One Out
-Como o prÛprio nome sugere: vamos deixar um de fora. 
+### Valida√ß√£o: Leave One Out
+Como o pr√≥prio nome sugere: vamos deixar um de fora. 
 
-Para cada um dos 620 modelos existentes, iremos separar as 82 observaÁıes em 82 partes, ou seja, iremos treinar com 81 observaÁıes e testar com a outra restante. E assim, iremos calcular a acur·cia mÈdia dessas 82 divisıes. Simples, n„o?
+Para cada um dos 620 modelos existentes, iremos separar as 82 observa√ß√µes em 82 partes, ou seja, iremos treinar com 81 observa√ß√µes e testar com a outra restante. E assim, iremos calcular a acur√°cia m√©dia dessas 82 divis√µes. Simples, n√£o?
 
-Essa maneira de validar È controversa, pois È muito sucetÌvel ‡ outliers, porÈm como estamos trabalhando com um volume de dados bem pequeno, se torna invi·vel criar poucas divisıes com maiores quantidades de dados, como por exemplo o K-Fold Validation com 3, 5 ou 10 partes. Desse modo o LOOCV (Leave One Out Cross Validation) se torna uma das maneiras de driblar a falta de dados.
+Essa maneira de validar √© controversa, pois √© muito sucet√≠vel √† outliers, por√©m como estamos trabalhando com um volume de dados bem pequeno, se torna invi√°vel criar poucas divis√µes com maiores quantidades de dados, como por exemplo o K-Fold Validation com 3, 5 ou 10 partes. Desse modo o LOOCV (Leave One Out Cross Validation) se torna uma das maneiras de driblar a falta de dados.
 
 ## Modelagem
 
-#### Vari·veis que ser„o populadas
-O pacote kknn suporta diversas variaÁıes de kernel (que estamos chamando de peso) porÈm iremos utilizar apenas a padr„o, que È a 'retangular'. Recomendo fortemente olhar a documentaÁ„o do pacote: https://www.rdocumentation.org/packages/kknn/versions/1.3.1/topics/kknn
+#### Vari√°veis que ser√£o populadas
+O pacote kknn suporta diversas varia√ß√µes de kernel (que estamos chamando de peso) por√©m iremos utilizar apenas a padr√£o, que √© a 'retangular'. Recomendo fortemente olhar a documenta√ß√£o do pacote: https://www.rdocumentation.org/packages/kknn/versions/1.3.1/topics/kknn
 ```{r}
 
 dist <- c(1, 1.5, 2, 3)
@@ -182,8 +182,8 @@ print(tail(variaveis, n = 5))
 ```
 
 
-#### CriaÁ„o dos modelos
-Esse pequeno bloco de cÛdigo È a nossa cereja do bolo. Aqui contÈm toda a essÍncia de nossa an·lise, populando todos os valores de par‚metros e sua respectiva performance para compararmos posteriormente.
+#### Cria√ß√£o dos modelos
+Esse pequeno bloco de c√≥digo √© a nossa cereja do bolo. Aqui cont√©m toda a ess√™ncia de nossa an√°lise, populando todos os valores de par√¢metros e sua respectiva performance para compararmos posteriormente.
 ```{r}
 for(var_id in 1:length(variaveis)){
   var <- variaveis[[var_id]]
@@ -226,8 +226,8 @@ df %>%
   print()
 ```
 
-Temos que o melhor modelo teve uma acur·cia prÛxima de 90% e o pior, prÛximo de 60%. Uma diferenÁa grotesca de performance.
-E obviamente, agora iremos utilizar os par‚metros do modelo com maior acur·cia para testar nos dados que deixamos de fora da seÁ„o de modelagem.
+Temos que o melhor modelo teve uma acur√°cia pr√≥xima de 90% e o pior, pr√≥ximo de 60%. Uma diferen√ßa grotesca de performance.
+E obviamente, agora iremos utilizar os par√¢metros do modelo com maior acur√°cia para testar nos dados que deixamos de fora da se√ß√£o de modelagem.
 
 #### Aplicando o modelo
 ```{r}
@@ -263,6 +263,6 @@ calcular_acc(teste = data_fora, fitted = fit$fitted.values, variavel = 'region')
   print()
 
 ```
-A validaÁ„o com novos dados performou melhor do que o esperado. PorÈm È algo que sempre pode acontecer, assim como poderia performar pior do que esperamos. Afinal, por mais que tentemos criar o melhor modelo possÌvel, trabalhamos com estatÌstica e probabilidade, e n„o com bolas de cristal.
-
-E assim concluÌmos nosso projeto. Vimos que os modelos mais simplistas tambÈm podem performar bons resultados, e n„o h· motivo para se afobar quando for iniciar um projeto de Data Science. ComeÁar pela soluÁ„o mais complexa È meter os pÈs pelas m„os, pois h· casos em que uma soluÁ„o que apenas um SÍnior conseguiria desenvolver perfomaria apenas um pouco melhor do que um (estagi·rio + google) com uma regress„o logÌstica ou KNN conseguiria fazer.
+E assim temos que nosso modelo escolhido obteve 95% de acur√°cia, errando apenas uma classifica√ß√£o dentre 20 tentativas.¬†
+Felizmente performou melhor que o esperado.
+E assim conclu√≠mos nosso projeto. Vimos que os modelos mais simplistas tamb√©m podem performar bons resultados, e n√£o h√° motivo para se afobar quando for iniciar um projeto de Data Science.
